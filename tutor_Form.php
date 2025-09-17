@@ -1,3 +1,7 @@
+<?php
+include("BDO/cidade/cidade_select.php");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,6 +16,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <link href="css/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Merienda+One" rel="stylesheet">
 </head>
@@ -106,7 +111,7 @@
                             <select id="salvando_cidade" class="form-control" name="cidades" required>
                                 <option></option>
                                 <?php foreach ($arrCombo as $value) { ?>
-									<option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
+                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
                                 <?php } ?>
                             </select>
                             <label>E-mail</label>
@@ -198,27 +203,36 @@
             </div>
         </div>
     </div>
-    <?php 
-function Mask($mask,$str){
+<?php 
+	function Mask($mask,$str){
 
-    $str = str_replace(" ","",$str);
+		$str = str_replace(" ","",$str);
 
-    for($i=0;$i<strlen($str);$i++){
-        $mask[strpos($mask,"#")] = $str[$i];
-    }
+		for($i=0;$i<strlen($str);$i++){
+			$mask[strpos($mask,"#")] = $str[$i];
+		}
 
-    return $mask;
-}
-
+		return $mask;
+	}
 ?>
 
     <!-- ********************************* SCRIPT *******************************************  -->
     <script type="text/javascript">
         $(document).ready(function() {
+			
+			function formatarDataISO(dataBR) {
+			  const partes = dataBR.split('/'); // Ex.: "01/12/2000" → ["01","12","2000"]
+			  return `${partes[2]}-${partes[1]}-${partes[0]}`;
+			}
 
             //Botão Adicionar
             $('.adcBtn').on('click', function() {
-                $('#addEmployeeModal').modal('show');
+				
+				$('#salvando_cpf').mask('000.000.000-00');
+				$('#salvando_telefone').mask('(00) 00000-0000');
+				$('#salvando_cep').mask('00000-000');
+    
+				$('#addEmployeeModal').modal('show');
             });
 
             //Botão Editar - carregando informações na tela
@@ -228,7 +242,7 @@ function Mask($mask,$str){
 
                 $tr = $(this).closest('tr');
                 var resultado = $tr.children("td").map(function() {
-                    return $(this).text().trim();
+                    return $(this).text();
                 }).get();
 
                 $.ajax({
@@ -239,26 +253,29 @@ function Mask($mask,$str){
                     },
                     success: function(data) {
                         var obj = $.parseJSON(data);
-						
                         $('#update_codigo').val(obj[0].codigo);
                         $('#update_nome').val(obj[0].nome);
-                        $('#update_cpf').val(obj[0].cpf);
-                        $('#update_dtnascimento').val(obj[0].dtnascimento);
-                        $('#update_cep').val(obj[0].cep);
+                        $('#update_cpf').val(obj[0].cpf).mask('000.000.000-00');
+                        //$('#update_dtnascimento').val(obj[0].dtnascimento);
+                        $('#update_cep').val(obj[0].cep).mask('00000-000');
                         $('#update_rua').val(obj[0].rua);
                         $('#update_complemento').val(obj[0].complemento);
                         $('#update_bairro').val(obj[0].bairro);
-						
-						// Seleciona a cidade correta no select
-						$('#update_cidade').val(obj[0].cidadeestado).prop('selected', true);
-                        //$('#update_cidade').val(obj[0].cidadeestado);
-						
+                        $('#update_cidade').val(obj[0].cidadeestado);
                         $('#update_email').val(obj[0].email);
-                        $('#update_telefone').val(obj[0].telefone);
+                        $('#update_telefone').val(obj[0].telefone).mask('(00) 00000-0000');
+						
+						function formatarDataBR(dataISO) {
+						  if (!dataISO) return '';
+						  const partes = dataISO.split('-'); // [2000,12,01]
+						  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+						}
+						$('#update_dtnascimento').val(formatarDataBR(obj[0].dtnascimento));
+						
+
                     },
                     error: function(data) {
-                        alert('Erro ao carregar os dados do tutor.');
-						console.error(data);
+                        alert(data);
                     }
                 });
             });
@@ -273,70 +290,114 @@ function Mask($mask,$str){
                     return $(this).text();
                 }).get();
 
-                $('#delete_codigo').val(data[1]);	
+                $('#delete_codigo').val(data[1]);
+
             });
 
+
+
             // Inicio - BOTÃO ADICIONAR - Inserindo informação no Banco
-            $("#salvar_cadastro").on('click', function() {
-                var select = document.getElementById('salvando_cidade');
-                var valueCidade = select.options[select.selectedIndex].value;
-                $.ajax({
-                    url: 'BDO/tutor/tutor_insert.php',
-                    type: 'POST',
-                    data: {
-                        nome: $("#salvando_nome").val(),
-                        cpf: $("#salvando_cpf").val(),
-                        dtnascimento: $("#salvando_dtnascimento").val(),
-                        cep: $("#salvando_cep").val(),
-                        rua: $("#salvando_rua").val(),
-                        complemento: $("#salvando_complemento").val(),
-                        bairro: $("#salvando_bairro").val(),
-                        cidadeestado: valueCidade,
-                        email: $("#salvando_email").val(),
-                        telefone: $("#salvando_telefone").val()
-                    },
-                    success: function(data) {
-                        $("#addEmployeeModal").html(data);
-						location.reload(); // recarrega a página para ver a alteração
-                    },
-                    error: function(data) {
-                        alert(data);
-                    }
-                });
-            });
+			$("#salvar_cadastro").on('click', function (e) {
+				e.preventDefault(); // impede o envio padrão do formulário
+
+				// Pega o código da cidade selecionada
+				var select = document.getElementById('salvando_cidade');
+				var valueCidade = select.options[select.selectedIndex].value;
+
+				// Envia os dados via AJAX
+				$.ajax({
+					url: 'BDO/tutor/tutor_insert.php',
+					type: 'POST',
+					data: {
+						nome: $("#salvando_nome").val(),
+						cpf: $("#salvando_cpf").val().mask('000.000.000-00'),
+						//dtnascimento: $("#salvando_dtnascimento").val(),
+						dtnascimento: formatarDataISO($("#salvando_dtnascimento").val()),
+						cep: $("#salvando_cep").val().mask('00000-000'),
+						rua: $("#salvando_rua").val(),
+						complemento: $("#salvando_complemento").val(),
+						bairro: $("#salvando_bairro").val(),
+						cidadeestado: valueCidade,
+						email: $("#salvando_email").val(),
+						telefone: $("#salvando_telefone").val().mask('(00) 00000-0000')
+					},
+					success: function (data) {
+						console.log("Resposta do servidor:", data); // debug
+						if (data.startsWith("OK")) {
+							$('#addEmployeeModal').modal('hide');
+							location.reload(); // recarrega a página após inserir
+						} else {
+							alert("Erro ao inserir: " + data);
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error("Erro AJAX:", error);
+						alert("Falha na comunicação com o servidor.");
+					}
+				});
+			});
             // Fim - Inserindo informação no Banco
 
             // Inicio - BOTÃO EDITAR - Alterando informação no Banco
-            $("#alterar_cadastro").on('click', function() {
-			
-                var select = document.getElementById('update_cidade');
-                var valueCidade = select.options[select.selectedIndex].value;
-                
+			$("#alterar_cadastro").on('click', function(e) {
+
+				e.preventDefault(); // previne submit padrão do form
+
+				var select = document.getElementById('update_cidade');
+				var valueCidade = select ? select.options[select.selectedIndex].value : '';
+				
+				function limparMascara(cpf) {
+				  return cpf.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var cpfLimpo = limparMascara($("#update_cpf").val());
+				
+				function limparMascara(cep) {
+				  return cep.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var cepLimpo = limparMascara($("#update_cep").val());
+
+				function limparMascara(telefone) {
+				  return telefone.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var telefoneLimpo = limparMascara($("#update_telefone").val());
+
 				$.ajax({
-                    url: 'BDO/tutor/tutor_update.php',
-                    type: 'POST',
-                    data: {
-                        codigo: $('#update_codigo').val(),
-                        nome: $('#update_nome').val(),
-                        cpf: $('#update_cpf').val(),
-                        dtnascimento: $('#update_dtnascimento').val(),
-                        cep: $('#update_cep').val(),
-                        rua: $('#update_rua').val(),
-                        complemento: $('#update_complemento').val(),
-                        bairro: $('#update_bairro').val(),
-                        cidadeestado: valueCidade,
-                        email: $('#update_email').val(),
-                        telefone: $('#update_telefone').val()
-                    },
-                    success: function(data) {
-                        $("#editEmployeeModal").html(data);
-						location.reload(); // recarrega a página para ver a alteração
-                    },
-                    error: function(data) {
-                        alert(data);
-                    }
-                });
-            });
+					url: 'BDO/tutor/tutor_update.php',
+					type: 'POST',
+					data: {
+						codigo: $('#update_codigo').val(),
+						nome: $('#update_nome').val(),
+						//cpf: $('#update_cpf').val(),
+						cpf: cpfLimpo, // envia só os números
+						//dtnascimento: $('#update_dtnascimento').val(),
+						dtnascimento: formatarDataISO($("#update_dtnascimento").val()),
+						//cep: $('#update_cep').val(),
+						cep: cepLimpo,
+						rua: $('#update_rua').val(),
+						complemento: $('#update_complemento').val(),
+						bairro: $('#update_bairro').val(),
+						cidadeestado: valueCidade,
+						email: $('#update_email').val(),
+						//telefone: $('#update_telefone').val()
+						telefone: telefoneLimpo
+
+					},
+					success: function(data) {
+						console.log('Retorno do servidor (update):', data);
+						// Se retorno começar com OK -> sucesso
+						if (typeof data === 'string' && data.indexOf('OK') === 0) {
+							$('#editEmployeeModal').modal('hide');
+							location.reload(); // recarrega para ver as alterações
+						} else {
+							alert('Erro ao atualizar: ' + data);
+						}
+					},
+					error: function(xhr, status, error) {
+						console.error('Erro AJAX (update):', status, error, xhr.responseText);
+						alert('Erro na requisição. Veja console para detalhes.');
+					}
+				});
+			});
             // Fim - Alterando informação no Banco
 
             // Inicio - Excluindo informação no Banco
@@ -348,7 +409,7 @@ function Mask($mask,$str){
                         codigo: $("#delete_codigo").val()
                     },
                     success: function(data) {
-                        $("#deleteEmployeeModal").html(hide);
+                        $("#deleteEmployeeModal").html(data);
 						location.reload(); // recarrega a página para ver a alteração
                     },
                     error: function(data) {

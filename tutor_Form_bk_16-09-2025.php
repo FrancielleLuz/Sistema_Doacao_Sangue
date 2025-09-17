@@ -1,3 +1,7 @@
+<?php
+include("BDO/cidade/cidade_select.php");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +9,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Usuário</title>
+    <title>Tutor</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -27,7 +31,7 @@
             <div class="table-title">
                 <div class="row">
                     <div class="col-sm-6">
-                        <h2><b>Usuário</b></h2>
+                        <h2><b>Tutor</b></h2>
                     </div>
                     <div class="col-sm-6">
                         <a href="" class="adcBtn btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Adicionar</span></a>
@@ -44,16 +48,15 @@
                         </th>
                         <th width="10%">Código</th>
                         <th width="20%">Nome</th>
-                        <th width="10%">E-mail</th>
-						<th width="20%">Login</th>
-						<th width="10%">Situação</th>
-                        <th width="25%">Data Cadastro</th>
+                        <th width="15%">CPF</th>
+                        <th width="25%">E-mail</th>
+                        <th width="20%">Telefone</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php 
-                	 include("BDO/usuario/usuario_select.php");
-					 $result = $stmt->fetchAll();
+                	 include("BDO/tutor/tutor_select.php");
+                     $result = $stmt->fetchAll();
                      foreach ($result as $value) {                 
                     ?>
                     <tr class="trCad">
@@ -66,10 +69,9 @@
                         </td>
                         <td width="10%"><?php echo $value['codigo']; ?></td>
                         <td width="20%"><?php echo $value['nome']; ?></td>
-                        <td width="10%"><?php echo $value['email']; ?></td>
-						<td width="20%"><?php echo $value['login']; ?></td>
-						<td width="10%"><?php echo $value['situacao']; ?></td>
-						<td width="25%"><?php echo $value['criado_em']; ?></td>
+                        <td width="10%"><?php echo Mask("###.###.###-##",$value['cpf']).'<BR>'; ?></td>
+                        <td width="25%"><?php echo $value['email']; ?></td>
+                        <td width="20%"><?php echo Mask("(##) #####-####",$value['telefone']).'<BR>'; ?></td>
                     </tr>
                     <?php } ?>
                 </tbody>
@@ -92,17 +94,29 @@
                         <div class="form-group">
                             <label>Nome Completo</label>
                             <input id="salvando_nome" type="text" class="form-control" required>
+                            <label>CPF</label>
+                            <input id="salvando_cpf" type="text" class="form-control" required>
+                            <label>Data de Nascimento</label>
+                            <input id="salvando_dtnascimento" type="text" class="form-control" required>
+                            <label>CEP</label>
+                            <input id="salvando_cep" type="text" class="form-control" required>
+                            <label>Rua</label>
+                            <input id="salvando_rua" type="text" class="form-control" required>
+                            <label>Complemento</label>
+                            <input id="salvando_complemento" type="text" class="form-control">
+                            <label>Bairro</label>
+                            <input id="salvando_bairro" type="text" class="form-control" required>
+                            <label>Cidade</label>
+                            <select id="salvando_cidade" class="form-control" name="cidades" required>
+                                <option></option>
+                                <?php foreach ($arrCombo as $value) { ?>
+                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
+                                <?php } ?>
+                            </select>
                             <label>E-mail</label>
                             <input id="salvando_email" type="text" class="form-control" required>
-							<label for="situacao">Situação:</label>
-							<select name="situacao" id="salvando_situacao" class="form-control">
-								<option value="A">Ativo</option>
-								<option value="I">Inativo</option>
-							</select>
-							<label>Login</label>
-                            <input id="salvando_login" type="text" class="form-control" required>
-							<label>Senha</label>
-                            <input id="salvando_senha" type="text" class="form-control" required>
+                            <label>Telefone</label>
+                            <input id="salvando_telefone" type="text" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -130,17 +144,29 @@
                         <div class="form-group">
                             <label>Nome Completo</label>
                             <input id="update_nome" type="text" class="form-control" required>
+                            <label>CPF</label>
+                            <input id="update_cpf" type="text" class="form-control" required>
+                            <label>Data de Nascimento</label>
+                            <input id="update_dtnascimento" type="text" class="form-control" required>
+                            <label>CEP</label>
+                            <input id="update_cep" type="text" class="form-control" required>
+                            <label>Rua</label>
+                            <input id="update_rua" type="text" class="form-control" required>
+                            <label>Complemento</label>
+                            <input id="update_complemento" type="text" class="form-control">
+                            <label>Bairro</label>
+                            <input id="update_bairro" type="text" class="form-control" required>
+                            <label>Cidade</label>
+                            <select id="update_cidade" class="form-control" required>
+                                <option></option>
+                                <?php foreach ($arrCombo as $value) { ?>
+                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
+                                <?php } ?>
+                            </select>
                             <label>E-mail</label>
                             <input id="update_email" type="text" class="form-control" required>
-							<label for="situacao">Situação:</label>
-							<select name="situacao" id="update_situacao" class="form-control">
-								<option value="A">Ativo</option>
-								<option value="I">Inativo</option>
-							</select>
-							<label>Login</label>
-                            <input id="update_login" type="text" class="form-control" required>
-							<label>Senha</label>
-                            <input id="update_senha" type="text" class="form-control" required>
+                            <label>Telefone</label>
+                            <input id="update_telefone" type="text" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -176,9 +202,8 @@
             </div>
         </div>
     </div>
-	
-<?php 
-	function Mask($mask,$str){
+    <?php 
+function Mask($mask,$str){
 
     $str = str_replace(" ","",$str);
 
@@ -187,7 +212,8 @@
     }
 
     return $mask;
-	}
+}
+
 ?>
 
     <!-- ********************************* SCRIPT *******************************************  -->
@@ -196,10 +222,11 @@
 
             //Botão Adicionar
             $('.adcBtn').on('click', function() {
+				
                 $('#addEmployeeModal').modal('show');
             });
 
-            //Botão Editar - carregar dados na tela
+            //Botão Editar - carregando informações na tela
             $('.editbtn').on('click', function() {
 
                 $('#editEmployeeModal').modal('show');
@@ -210,7 +237,7 @@
                 }).get();
 
                 $.ajax({
-                    url: 'BDO/usuario/usuario_selectConsulta.php',
+                    url: 'BDO/tutor/tutor_selectConsulta.php',
                     type: 'POST',
                     data: {
                         codigo: resultado[1]
@@ -219,17 +246,22 @@
                         var obj = $.parseJSON(data);
                         $('#update_codigo').val(obj[0].codigo);
                         $('#update_nome').val(obj[0].nome);
+                        $('#update_cpf').val(obj[0].cpf);
+                        $('#update_dtnascimento').val(obj[0].dtnascimento);
+                        $('#update_cep').val(obj[0].cep);
+                        $('#update_rua').val(obj[0].rua);
+                        $('#update_complemento').val(obj[0].complemento);
+                        $('#update_bairro').val(obj[0].bairro);
+                        $('#update_cidade').val(obj[0].cidadeestado);
                         $('#update_email').val(obj[0].email);
-                        $('#update_situacao').val(obj[0].situacao);
-                        $('#update_login').val(obj[0].login);
-                        $('#update_senha').val(obj[0].senha);
+                        $('#update_telefone').val(obj[0].telefone);
                     },
                     error: function(data) {
                         alert(data);
                     }
                 });
             });
-			
+
             //Botão Excluir
             $('.delbtn').on('click', function() {
 
@@ -241,19 +273,27 @@
                 }).get();
 
                 $('#delete_codigo').val(data[1]);
+				location.reload(); // recarrega a página para ver a alteração
             });
 
             // Inicio - BOTÃO ADICIONAR - Inserindo informação no Banco
             $("#salvar_cadastro").on('click', function() {
+                var select = document.getElementById('salvando_cidade');
+                var valueCidade = select.options[select.selectedIndex].value;
                 $.ajax({
-                    url: 'BDO/usuario/usuario_insert.php',
+                    url: 'BDO/tutor/tutor_insert.php',
                     type: 'POST',
                     data: {
                         nome: $("#salvando_nome").val(),
+                        cpf: $("#salvando_cpf").val(),
+                        dtnascimento: $("#salvando_dtnascimento").val(),
+                        cep: $("#salvando_cep").val(),
+                        rua: $("#salvando_rua").val(),
+                        complemento: $("#salvando_complemento").val(),
+                        bairro: $("#salvando_bairro").val(),
+                        cidadeestado: valueCidade,
                         email: $("#salvando_email").val(),
-                        situacao: $("#salvando_situacao").val(),
-						login: $("#salvando_login").val(),   
-						senha: $("#salvando_senha").val() 
+                        telefone: $("#salvando_telefone").val()
                     },
                     success: function(data) {
                         $("#addEmployeeModal").html(data);
@@ -267,28 +307,36 @@
             // Fim - Inserindo informação no Banco
 
             // Inicio - BOTÃO EDITAR - Alterando informação no Banco
-            $("#alterar_cadastro").on('click', function(e) {
+            $("#alterar_cadastro").on('click', function() {
 				e.preventDefault();
 				
+                var select = document.getElementById('update_cidade');
+                var valueCidade = select.options[select.selectedIndex].value;
+				
                 $.ajax({
-                    url: 'BDO/usuario/usuario_update.php',
+                    url: 'BDO/tutor/tutor_update.php',
                     type: 'POST',
                     data: {
-						codigo: $('#update_codigo').val(),
+                        codigo: $('#update_codigo').val(),
                         nome: $('#update_nome').val(),
+                        cpf: $('#update_cpf').val(),
+                        dtnascimento: $('#update_dtnascimento').val(),
+                        cep: $('#update_cep').val(),
+                        rua: $('#update_rua').val(),
+                        complemento: $('#update_complemento').val(),
+                        bairro: $('#update_bairro').val(),
+                        cidadeestado: valueCidade,
                         email: $('#update_email').val(),
-						situacao: $('#update_situacao').val(),
-						login: $('#update_login').val(),
-						senha: $('#update_senha').val()
+                        telefone: $('#update_telefone').val()
                     },
                     success: function(data) {
-                        console.log('Update retornou:', data);
-						alert('Usuário atualizado com sucesso!');
+						console.log('Update retornou:', data);
+						alert('Tutor atualizado com sucesso!');
 						location.reload(); // recarrega a página para ver a alteração
                     },
                     error: function(data) {
                         console.error('Erro no update:', status, error);
-						alert('Ocorreu um erro ao atualizar o usuário.');
+						alert('Ocorreu um erro ao atualizar o tutor.');
                     }
                 });
             });
@@ -297,13 +345,13 @@
             // Inicio - Excluindo informação no Banco
             $("#deletar_cadastro").on('click', function() {
                 $.ajax({
-                    url: 'BDO/usuario/usuario_delete.php',
+                    url: 'BDO/tutor/tutor_delete.php',
                     type: 'POST',
                     data: {
                         codigo: $("#delete_codigo").val()
                     },
                     success: function(data) {
-                        $("#deleteEmployeeModal").html(hide);
+                        $("#deleteEmployeeModal").html(data);
 						location.reload(); // recarrega a página para ver a alteração
                     },
                     error: function(data) {
