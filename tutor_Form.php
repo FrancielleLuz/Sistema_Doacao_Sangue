@@ -203,6 +203,7 @@ include("BDO/cidade/cidade_select.php");
             </div>
         </div>
     </div>
+	
 <?php 
 	function Mask($mask,$str){
 
@@ -224,6 +225,13 @@ include("BDO/cidade/cidade_select.php");
 			  const partes = dataBR.split('/'); // Ex.: "01/12/2000" → ["01","12","2000"]
 			  return `${partes[2]}-${partes[1]}-${partes[0]}`;
 			}
+			
+			function formatarDataBR(dataISO) {
+			  if (!dataISO) return '';
+			  const partes = dataISO.split('-'); // Ex.: "2000-12-01" → ["2000","12","01"]
+			  if (partes.length !== 3) return '';
+			  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+			}
 
             //Botão Adicionar
             $('.adcBtn').on('click', function() {
@@ -231,7 +239,8 @@ include("BDO/cidade/cidade_select.php");
 				$('#salvando_cpf').mask('000.000.000-00');
 				$('#salvando_telefone').mask('(00) 00000-0000');
 				$('#salvando_cep').mask('00000-000');
-    
+				$('#salvando_dtnascimento').mask('00/00/0000');
+
 				$('#addEmployeeModal').modal('show');
             });
 
@@ -255,23 +264,26 @@ include("BDO/cidade/cidade_select.php");
                         var obj = $.parseJSON(data);
                         $('#update_codigo').val(obj[0].codigo);
                         $('#update_nome').val(obj[0].nome);
-                        $('#update_cpf').val(obj[0].cpf).mask('000.000.000-00');
-                        //$('#update_dtnascimento').val(obj[0].dtnascimento);
-                        $('#update_cep').val(obj[0].cep).mask('00000-000');
                         $('#update_rua').val(obj[0].rua);
                         $('#update_complemento').val(obj[0].complemento);
                         $('#update_bairro').val(obj[0].bairro);
                         $('#update_cidade').val(obj[0].cidadeestado);
                         $('#update_email').val(obj[0].email);
-                        $('#update_telefone').val(obj[0].telefone).mask('(00) 00000-0000');
+						
+						$('#update_cpf').unmask();
+                        $('#update_cpf').val(obj[0].cpf).mask('000.000.000-00');  
+						$('#update_cep').unmask();						
+						$('#update_cep').val(obj[0].cep).mask('00000-000');
+						$('#update_telefone').unmask();                        
+						$('#update_telefone').val(obj[0].telefone).mask('(00) 00000-0000');
 						
 						function formatarDataBR(dataISO) {
-						  if (!dataISO) return '';
-						  const partes = dataISO.split('-'); // [2000,12,01]
-						  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+							if (!dataISO) return '';
+							const partes = dataISO.split('-'); // "2000-12-01" -> ["2000","12","01"]
+							return `${partes[2]}/${partes[1]}/${partes[0]}`;
 						}
-						$('#update_dtnascimento').val(formatarDataBR(obj[0].dtnascimento));
-						
+				
+						$('#update_dtnascimento').val(formatarDataBR(obj[0].dtnascimento)).mask('00/00/0000');
 
                     },
                     error: function(data) {
@@ -303,6 +315,25 @@ include("BDO/cidade/cidade_select.php");
 				// Pega o código da cidade selecionada
 				var select = document.getElementById('salvando_cidade');
 				var valueCidade = select.options[select.selectedIndex].value;
+				
+				//gera log
+				console.log("Enviando dados para tutor_insert.php...");
+				console.log($("#formTutor").serialize());
+
+				function limparMascara(cpf) {
+				  return cpf.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var cpfLimpo = limparMascara($("#salvando_cpf").val());
+				
+				function limparMascara(cep) {
+				  return cep.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var cepLimpo = limparMascara($("#salvando_cep").val());
+
+				function limparMascara(telefone) {
+				  return telefone.replace(/\D/g, ''); // remove tudo que não é número
+				}
+				var telefoneLimpo = limparMascara($("#salvando_telefone").val());
 
 				// Envia os dados via AJAX
 				$.ajax({
@@ -310,16 +341,15 @@ include("BDO/cidade/cidade_select.php");
 					type: 'POST',
 					data: {
 						nome: $("#salvando_nome").val(),
-						cpf: $("#salvando_cpf").val().mask('000.000.000-00'),
-						//dtnascimento: $("#salvando_dtnascimento").val(),
-						dtnascimento: formatarDataISO($("#salvando_dtnascimento").val()),
-						cep: $("#salvando_cep").val().mask('00000-000'),
 						rua: $("#salvando_rua").val(),
 						complemento: $("#salvando_complemento").val(),
 						bairro: $("#salvando_bairro").val(),
-						cidadeestado: valueCidade,
 						email: $("#salvando_email").val(),
-						telefone: $("#salvando_telefone").val().mask('(00) 00000-0000')
+						cidadeestado: valueCidade, 
+						dtnascimento: formatarDataISO($("#salvando_dtnascimento").val()),
+						cep: cepLimpo, // envia só os números
+						cpf: cpfLimpo, // envia só os números
+						telefone: telefoneLimpo // envia só os números
 					},
 					success: function (data) {
 						console.log("Resposta do servidor:", data); // debug
@@ -361,26 +391,31 @@ include("BDO/cidade/cidade_select.php");
 				}
 				var telefoneLimpo = limparMascara($("#update_telefone").val());
 
+						function formatarDataISO(dataBR) {
+							if (!dataBR) return '';
+							const partes = dataBR.split('/'); // "01/12/2000" -> ["01","12","2000"]
+							return `${partes[2]}-${partes[1]}-${partes[0]}`;
+						}
+
+
 				$.ajax({
 					url: 'BDO/tutor/tutor_update.php',
 					type: 'POST',
 					data: {
 						codigo: $('#update_codigo').val(),
 						nome: $('#update_nome').val(),
-						//cpf: $('#update_cpf').val(),
-						cpf: cpfLimpo, // envia só os números
-						//dtnascimento: $('#update_dtnascimento').val(),
-						dtnascimento: formatarDataISO($("#update_dtnascimento").val()),
-						//cep: $('#update_cep').val(),
-						cep: cepLimpo,
 						rua: $('#update_rua').val(),
 						complemento: $('#update_complemento').val(),
 						bairro: $('#update_bairro').val(),
 						cidadeestado: valueCidade,
 						email: $('#update_email').val(),
-						//telefone: $('#update_telefone').val()
-						telefone: telefoneLimpo
-
+						
+						cep: cepLimpo, // envia só os números						
+						cpf: cpfLimpo, // envia só os números						
+						telefone: telefoneLimpo, // envia só os números
+						
+						dtnascimento: formatarDataISO($("#update_dtnascimento").val())
+	
 					},
 					success: function(data) {
 						console.log('Retorno do servidor (update):', data);
@@ -401,27 +436,33 @@ include("BDO/cidade/cidade_select.php");
             // Fim - Alterando informação no Banco
 
             // Inicio - Excluindo informação no Banco
-            $("#deletar_cadastro").on('click', function() {
-                $.ajax({
-                    url: 'BDO/tutor/tutor_delete.php',
-                    type: 'POST',
-                    data: {
-                        codigo: $("#delete_codigo").val()
-                    },
-                    success: function(data) {
-                        $("#deleteEmployeeModal").html(data);
-						location.reload(); // recarrega a página para ver a alteração
-                    },
-                    error: function(data) {
-                        alert(data);
-                    }
-                });
-
-            });
+            $("#deletar_cadastro").on('click', function(e) {
+				e.preventDefault(); // previne o submit do form
+				$.ajax({
+					url: 'BDO/tutor/tutor_delete.php',
+					type: 'POST',
+					data: {
+						codigo: $("#delete_codigo").val()
+					},
+					success: function(data) {
+						// Fechar o modal
+						$("#deleteEmployeeModal").modal('hide');
+						// Recarregar a página para atualizar a tabela
+						location.reload();
+					},
+					error: function(xhr, status, error) {
+						console.error('Erro AJAX (delete):', status, error, xhr.responseText);
+						alert('Erro ao excluir. Veja o console para detalhes.');
+					}
+				});
+			});
             // Fim - Excluindo informação no Banco
         });
 
     </script>
+	<!-- jQuery Mask Plugin -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
 </body>
 
 </html>
