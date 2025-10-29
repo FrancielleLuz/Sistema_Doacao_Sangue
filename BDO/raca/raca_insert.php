@@ -1,0 +1,14 @@
+<?php  
+	require_once __DIR__ . '/../_bootstrap.php'; //Conexão com o banco de dados
+		
+	//Inserindo
+	try {
+     
+  		$stmt = $pdo->prepare('INSERT INTO raca (codigo, nome, especie) VALUES (null,:nome, :especie)');
+		$stmt->execute(array(':nome' => $_POST['nome'], ':especie' => $_POST['especie']));
+   
+		echo $stmt->rowCount(); 
+	}
+	catch(PDOException $e) {
+    	echo 'Error: ' . $e -> getMessage();
+	}
