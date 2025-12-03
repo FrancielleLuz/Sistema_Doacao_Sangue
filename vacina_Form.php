@@ -48,7 +48,7 @@
                         </th>
                         <th width="10%">Código</th>
                         <th width="25%">Nome</th>
-                        <th width="65%">Descrição</th>
+                        <th width="65%">Observação</th>
                     </tr>
                 </thead>
                 <tbody id="myTable">

@@ -6,7 +6,7 @@
 		$stmt = $pdo->prepare('SELECT raca.codigo, raca.nome, especie.nome especie 
                                FROM raca 
                                INNER JOIN especie ON 
-                               especie.codigo = raca.especie');
+                               especie.codigo = raca.codespecie');
 		$stmt->execute();
 	}
 	catch(PDOException $e) {

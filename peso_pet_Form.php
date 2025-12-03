@@ -1,8 +1,3 @@
-<?php
-include("BDO/cidade/cidade_select.php");
-include("BDO/clinica/clinica_select.php");
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +5,7 @@ include("BDO/clinica/clinica_select.php");
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Veterinário</title>
+    <title>Histórico de Peso</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -34,7 +29,7 @@ include("BDO/clinica/clinica_select.php");
             <div class="table-title">
                 <div class="row">
                     <div class="col-sm-6">
-                        <h2><b>Veterinário</b></h2>
+                        <h2><b>Histórico de Peso do Animal</b></h2>
                     </div>
                     <div class="col-sm-6">
                         <a href="" class="adcBtn btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Adicionar</span></a>
@@ -52,14 +47,13 @@ include("BDO/clinica/clinica_select.php");
                             <p>
                         </th>
                         <th width="10%">Código</th>
-                        <th width="30%">Nome</th>
-                        <th width="30%">CRMV</th>
-                        <th width="20%">Telefone</th>
+                        <th width="25%">Data</th>
+                        <th width="65%">Peso</th>
                     </tr>
                 </thead>
                 <tbody id="myTable">
                     <?php 
-                	 include("BDO/veterinario/veterinario_select.php");
+                	 include("BDO/pet/peso_pet_select.php");
                      $result = $stmt->fetchAll();
                      foreach ($result as $value) {                 
                     ?>
@@ -72,9 +66,8 @@ include("BDO/clinica/clinica_select.php");
                             <a href="" class="delbtn delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Excluir">&#xE872;</i></a>
                         </td>
                         <td width="10%"><?php echo $value['codigo']; ?></td>
-                        <td width="30%"><?php echo $value['nome']; ?></td>
-                        <td width="30%"><?php echo $value['crmv']; ?></td>
-                        <td width="20%"><?php echo Mask("(##) #####-####",$value['telefone']).'<BR>'; ?></td>
+                        <td width="25%"><?php echo $value['datah']; ?></td>
+                        <td width="65%"><?php echo $value['peso']; ?></td>
                     </tr>
                     <?php } ?>
                 </tbody>
@@ -95,28 +88,10 @@ include("BDO/clinica/clinica_select.php");
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label>Nome Completo</label>
+                            <label>Nome</label>
                             <input id="salvando_nome" type="text" class="form-control" required>
-                            <label>CRMV</label>
-                            <input id="salvando_crmv" type="text" class="form-control" required>
-
-                            <label>Cidade</label>
-
-                            <select id="salvando_cidade" class="form-control" required>
-                                <option></option>
-                                <?php foreach ($arrCombo as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
-                                <?php } ?>
-                            </select>
-							
-							<select id="salvando_clinica" class="form-control" required>
-                                <option></option>
-                                <?php foreach ($arrCombo as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['clinica']; ?></option>
-                                <?php } ?>
-                            </select>
-                            <label>Telefone</label>
-                            <input id="salvando_telefone" type="text" class="form-control" required>							
+                            <label>Descrição</label>
+                            <input id="salvando_descricao" type="text" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -142,26 +117,10 @@ include("BDO/clinica/clinica_select.php");
                     <div class="modal-body">
                         <input type="hidden" name="update_codigo" id="update_codigo">
                         <div class="form-group">
-                            <label>Nome Completo</label>
+                            <label>Nome</label>
                             <input id="update_nome" type="text" class="form-control" required>
-                            <label>CRMV</label>
-                            <input id="update_crmv" type="text" class="form-control" required>
-                            <label>Cidade</label>
-                            <select id="update_cidade" class="form-control" required>
-                                <option></option>
-                                <?php foreach ($arrCombo as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
-                                <?php } ?>
-                            </select>
-							<label>Clinica</label>
-                            <select id="update_clinica" class="form-control" required>
-                                <option></option>
-                                <?php foreach ($arrCombo as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['clinica']; ?></option>
-                                <?php } ?>
-                            </select>
-                            <label>Telefone</label>
-                            <input id="update_telefone" type="text" class="form-control" required>						
+                            <label>Descrição</label>
+                            <input id="update_descricao" type="text" class="form-control" require>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -220,37 +179,41 @@ function Mask($mask,$str){
                 $('#addEmployeeModal').modal('show');
             });
 
+
             //Botão Editar
             $('.editbtn').on('click', function() {
 
                 $('#editEmployeeModal').modal('show');
 
                 $tr = $(this).closest('tr');
-                var resultado = $tr.children("td").map(function() {
+                var data = $tr.children("td").map(function() {
                     return $(this).text();
                 }).get();
 
+                $('#update_codigo').val(data[1]);
+                $('#update_nome').val(data[2]);
+                $('#update_descricao').val(data[3])
+            });
+
+            // Inicio - Alterando informação no Banco
+            $("#alterar_cadastro").on('click', function() {
                 $.ajax({
-                    url: 'BDO/veterinario/veterinario_selectConsulta.php',
+                    url: 'BDO/exame/exame_update.php',
                     type: 'POST',
                     data: {
-                        codigo: resultado[1]
+                        codigo: $("#update_codigo").val(),
+                        nome: $("#update_nome").val(),
+                        descricao: $("#update_descricao").val()
                     },
                     success: function(data) {
-                        var obj = $.parseJSON(data);
-                        $('#update_codigo').val(obj[0].codigo);
-                        $('#update_nome').val(obj[0].nome);
-                        $('#update_crmv').val(obj[0].crmv);
-                        $('#update_cidade').val(obj[0].cidadeestado);
-                        $('#update_clinica').val(obj[0].clinica);
-                        $('#update_telefone').val(obj[0].telefone);
-
+                        $("#editEmployeeModal").html(data);
                     },
                     error: function(data) {
                         alert(data);
                     }
                 });
             });
+            // Fim - Alterando informação no Banco
 
             //Botão Excluir
             $('.delbtn').on('click', function() {
@@ -268,20 +231,12 @@ function Mask($mask,$str){
             // Inicio - Inserindo informação no Banco
             $("#salvar_cadastro").on('click', function() {
                 var select = document.getElementById('salvando_cidade');
-                var valueCidade = select.options[select.selectedIndex].value;
-
-                var select = document.getElementById('salvando_clinica');
-                var valueClinica = select.options[select.selectedIndex].value;
-
                 $.ajax({
-                    url: 'BDO/veterinario/veterinario_insert.php',
+                    url: 'BDO/exame/exame_insert.php',
                     type: 'POST',
                     data: {
                         nome: $("#salvando_nome").val(),
-                        cpf: $("#salvando_crmv").val(),
-                        cidadeestado: valueCidade,
-						clinica: valueClinica,
-                        telefone: $("#salvando_telefone").val()
+                        descricao: $("#salvando_descricao").val(),
                     },
                     success: function(data) {
                         $("#addEmployeeModal").html(data);
@@ -293,39 +248,10 @@ function Mask($mask,$str){
             });
             // Fim - Inserindo informação no Banco
 
-            // Inicio - Alterando informação no Banco
-            $("#alterar_cadastro").on('click', function() {
-                var select = document.getElementById('update_cidade');
-                var valueCidade = select.options[select.selectedIndex].value;
-				
-				var select = document.getElementById('update_clinica');
-                var valueClinica = select.options[select.selectedIndex].value;
-				
-                $.ajax({
-                    url: 'BDO/veterinario/veterinario_update.php',
-                    type: 'POST',
-                    data: {
-                        codigo: $('#update_codigo').val(),
-                        nome: $('#update_nome').val(),
-                        crmv: $('#update_crmv').val(),
-                        cidadeestado: valueCidade,
-						clinica: valueClinica,
-                        telefone: $('#update_telefone').val()
-                    },
-                    success: function(data) {
-                        $("#editEmployeeModal").html(data);
-                    },
-                    error: function(data) {
-                        alert(data);
-                    }
-                });
-            });
-            // Fim - Alterando informação no Banco
-
             // Inicio - Excluindo informação no Banco
             $("#deletar_cadastro").on('click', function() {
                 $.ajax({
-                    url: 'BDO/veterinario/veterinario_delete.php',
+                    url: 'BDO/exame/exame_delete.php',
                     type: 'POST',
                     data: {
                         codigo: $("#delete_codigo").val()

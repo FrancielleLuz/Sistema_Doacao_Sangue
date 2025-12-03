@@ -19,6 +19,7 @@ include("BDO/cidade/cidade_select.php");
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <link href="css/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Merienda+One" rel="stylesheet">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 
 <body>
@@ -39,6 +40,8 @@ include("BDO/cidade/cidade_select.php");
                     </div>
                 </div>
             </div>
+			
+			<input class="form-control" id="myInput" type="text" placeholder="Procurar..">
             <!-- Fim  - Informações Top da tela -->
 
             <table class="table table-striped table-hover">
@@ -458,6 +461,17 @@ include("BDO/cidade/cidade_select.php");
 			});
             // Fim - Excluindo informação no Banco
         });
+		
+		//Inicio - Procurar
+        $(document).ready(function() {
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#myTable tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+        //Fim - Procurar
 
     </script>
 	<!-- jQuery Mask Plugin -->
