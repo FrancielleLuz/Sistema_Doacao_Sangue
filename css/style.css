@@ -492,3 +492,44 @@ table.table .avatar {
 .modal form label {
     font-weight: normal;
 }
+
+/* Dashboard */
+
+.card-dashboard {
+    border-radius: 12px;
+    padding: 20px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.card-dashboard:hover {
+    transform: scale(1.03);
+}
+
+.card-ok {
+    background: linear-gradient(45deg, #28a745, #5cd65c);
+}
+
+.card-alerta {
+    background: linear-gradient(45deg, #ffc107, #ffdb4d);
+    color: #000;
+}
+
+.card-critico {
+    background: linear-gradient(45deg, #dc3545, #ff6666);
+}
+
+.card-titulo {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.card-valor {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.card-sub {
+    font-size: 14px;
+}

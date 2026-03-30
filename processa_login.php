@@ -51,7 +51,7 @@ if ($autenticado) {
   $_SESSION['usuario_codigo'] = $u['codigo'];
   $_SESSION['usuario_nome']   = $u['nome'];
 
-  header('Location: /Sistema_Doacao_Sangue/index.php');
+  header('Location: /Sistema_Doacao_Sangue/dashboard_estoque_Form.php');
   exit;
 }
 

@@ -57,13 +57,15 @@ include("BDO/pet/pet_tutor_select.php");         // define $arrCombo4 (tutores)
                 $result = $stmt->fetchAll();
                 foreach ($result as $value) { ?>
                 <tr class="trCad">
-                    <td>
+                    <!-- ================= BOTÕES ================= -->                    
+					<td>
                         <a href="#" class="editbtn edit" data-toggle="modal"><i class="material-icons" title="Editar">&#xE254;</i></a>
                         <a href="#" class="delbtn delete" data-toggle="modal"><i class="material-icons" title="Excluir">&#xE872;</i></a>
                     </td>
                     <td><?php echo $value['codigo']; ?></td>
                     <td><a href="pet_Comp_Form.php?id=<?php echo $value['codigo']; ?>"><?php echo $value['nome']; ?></a></td>
-                    <td><?php echo $value['dtNascimento']; ?></td>
+                    
+					<td><?php echo date('d/m/Y', strtotime($value['dtNascimento'])); ?></td>
                     <td><?php echo $value['sexo']; ?></td>
                     <td><?php echo $value['doador']; ?></td>
                     <td><?php echo $value['especie']; ?></td>
