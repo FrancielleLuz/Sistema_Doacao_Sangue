@@ -103,17 +103,16 @@ include("BDO/clinica/clinica_select.php");
                             <label>Cidade</label>
 
                             <select id="salvando_cidade" class="form-control" required>
-                                <option value="">Selecione</option>
+                                <option></option>
                                 <?php foreach ($arrCombo as $value) { ?>
                                 <option value="<?php echo $value['codigo']; ?>"><?php echo $value['cidade']; ?></option>
                                 <?php } ?>
                             </select>
 							
-							<label>Clínica</label>
 							<select id="salvando_clinica" class="form-control" required>
-                                <option value="">Selecione</option>
-                                <?php foreach ($arrClinica as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['razaoSocial']; ?></option>
+                                <option></option>
+                                <?php foreach ($arrCombo as $value) { ?>
+                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['clinica']; ?></option>
                                 <?php } ?>
                             </select>
                             <label>Telefone</label>
@@ -157,8 +156,8 @@ include("BDO/clinica/clinica_select.php");
 							<label>Clinica</label>
                             <select id="update_clinica" class="form-control" required>
                                 <option></option>
-                                <?php foreach ($arrClinica as $value) { ?>
-                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['razaoSocial']; ?></option>
+                                <?php foreach ($arrCombo as $value) { ?>
+                                <option value="<?php echo $value['codigo']; ?>"><?php echo $value['clinica']; ?></option>
                                 <?php } ?>
                             </select>
                             <label>Telefone</label>
@@ -279,18 +278,13 @@ function Mask($mask,$str){
                     type: 'POST',
                     data: {
                         nome: $("#salvando_nome").val(),
-                        crmv: $("#salvando_crmv").val(),
+                        cpf: $("#salvando_crmv").val(),
                         cidadeestado: valueCidade,
 						clinica: valueClinica,
                         telefone: $("#salvando_telefone").val()
                     },
                     success: function(data) {
-                        if (data > 0) {
-                            alert('Veterinário cadastrado com sucesso!');
-                            location.reload();
-                        } else {
-                            alert('Erro ao cadastrar. Verifique os dados e tente novamente.');
-                        }
+                        $("#addEmployeeModal").html(data);
                     },
                     error: function(data) {
                         alert(data);
@@ -319,12 +313,7 @@ function Mask($mask,$str){
                         telefone: $('#update_telefone').val()
                     },
                     success: function(data) {
-                        if (data > 0) {
-                            alert('Veterinário atualizado com sucesso!');
-                            location.reload();
-                        } else {
-                            alert('Erro ao atualizar. Verifique os dados e tente novamente.');
-                        }
+                        $("#editEmployeeModal").html(data);
                     },
                     error: function(data) {
                         alert(data);
@@ -342,12 +331,7 @@ function Mask($mask,$str){
                         codigo: $("#delete_codigo").val()
                     },
                     success: function(data) {
-                        if (data > 0) {
-                            alert('Veterinário excluído com sucesso!');
-                            location.reload();
-                        } else {
-                            alert('Erro ao excluir.');
-                        }
+                        $("#deleteEmployeeModal").html(data);
                     },
                     error: function(data) {
                         alert(data);

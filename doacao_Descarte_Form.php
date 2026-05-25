@@ -13,7 +13,7 @@ function formatarDataBR($data) {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de Doação</title>
+    <title>Descarte de Bolsa</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -32,7 +32,7 @@ function formatarDataBR($data) {
         <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-					<h2><b>Registro de doação</b></h2>
+					<h2><b>Registro de descarte</b></h2>
 				</div>
                 <div class="col-sm-6">
                     <a href="#" class="adcBtn btn btn-success">
@@ -47,7 +47,6 @@ function formatarDataBR($data) {
 	<table class="table table-striped">
         <thead>
             <tr>
-				<th></th>
                 <th width="10%">Data</th>
 				<th width="20%">Lote</th>             
                 <th width="30%">Pet</th>
@@ -58,15 +57,13 @@ function formatarDataBR($data) {
 
         <tbody id="myTable">
             <?php 
-            include("BDO/doacao_saida/doacao_saida_select.php");
+            include("BDO/doacao_descarte/doacao_descarte_select2.php");
             foreach ($stmt->fetchAll() as $row) { ?>
                 <tr class="trCad">
                     <!-- ================= BOTÕES ================= -->
-					<td>
-						<a href="#" class="delbtn delete" data-toggle="modal"><i class="material-icons" title="Excluir">&#xE872;</i></a>
-                    </td>
+
                     
-					<td width="10%"><a href="doacao_saida_Comp_Form.php?id=<?php echo $row['codigo']; ?>"><?php echo date('d/m/Y', strtotime($row['datasaida'])); ?></a></td>
+					<td width="10%"><a href="doacao_Descarte_Comp_Form.php?id=<?php echo $row['codigo']; ?>"><?php echo date('d/m/Y', strtotime($row['datasaida'])); ?></a></td>
                     
 					<td width="20%"><?php echo $row['codlot']; ?></td>
                     <td width="30%"><?php echo $row['nomePet']; ?></td>
@@ -88,16 +85,16 @@ function formatarDataBR($data) {
 			<form id="formSaida">
 
 			<div class="modal-header">
-				<h4>Registrar Saída</h4>
+				<h4>Registrar Descarte</h4>
 			</div>
 
 			<div class="modal-body">
 
 			<label>Lote</label>
-			<select id="codentdoa" name="codentdoa" class="form-control" required>
+			<select id="codsaides" name="codsaides" class="form-control" required>
 				<option value="">Selecione</option>
 				<?php 
-				include("BDO/doacao_saida/doacao_saida_buscar_lote.php");
+				include("BDO/doacao_descarte/doacao_descarte_select.php");
 				foreach ($stmtLote ->fetchAll() as $row) {
 					echo "<option value='{$row['codigo']}'>Lote {$row['codlot']}</option>";
 				}
@@ -116,20 +113,6 @@ function formatarDataBR($data) {
 
 			<label>Qtd Coletada</label>
 			<input id="qtd" class="form-control" readonly>
-
-			<label>Qtd Saída</label>
-			<input name="qtdsaida" class="form-control" required>
-
-			<label>Pet Receptor</label>
-			<select name="codpetrec" class="form-control" required>
-				<option value="">Selecione</option>
-				<?php 
-				include("BDO/pet/pet_select_combo.php");
-				foreach ($stmt->fetchAll() as $pet) {
-					echo "<option value='{$pet['codigo']}'>{$pet['nome']}</option>";
-				}
-				?>
-			</select>
 
 			<label>Veterinário</label>
 			<select name="codvet" class="form-control" required>
@@ -194,12 +177,12 @@ $(document).ready(function(){
 	
 	$(document).ready(function(){
 		// AJAX carregar dados
-		$('#codentdoa').change(function(){
+		$('#codsaides').change(function(){
 
 			var cod = $(this).val();
 
-			$.post('BDO/doacao_saida/doacao_saida_buscar_entrada.php',
-				{codentdoa: cod},
+			$.post('BDO/doacao_descarte/doacao_descarte_buscar_entrada.php',
+				{codsaides: cod},
 				function(res){
 
 					if(res.status === 'ok'){
@@ -221,7 +204,7 @@ $(document).ready(function(){
 		$('#formSaida').submit(function(e){
 			e.preventDefault();
 
-			$.post('BDO/doacao_saida/doacao_saida_insert.php',
+			$.post('BDO/doacao_descarte/doacao_descarte_insert.php',
 				$(this).serialize(),
 				function(res){
 					alert(res.msg);

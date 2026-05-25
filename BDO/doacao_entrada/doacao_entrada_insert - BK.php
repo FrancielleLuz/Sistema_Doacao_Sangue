@@ -31,8 +31,6 @@ try {
     $codvet = $_POST['codvet'] ?? null;
     $obsdoc = $_POST['obsdoc'] ?? null;
 
-    $forcar = $_POST['forcar'] ?? '0';
-
     // VALIDAÇÃO
     if (!$datent || !$horent || !$codpet || !$codtip || !$qtdcol || !$datven || !$codvet || !$codlot) {
         echo json_encode([
@@ -42,55 +40,6 @@ try {
         exit;
     }
 
-    // VALIDAÇÃO: INTERVALO DE 90 DIAS ENTRE DOAÇÕES
-    if ($forcar !== '1') {
-        $sqlIntervalo = "SELECT datent FROM entradadoacao 
-                         WHERE codpet = :codpet 
-                         ORDER BY datent DESC 
-                         LIMIT 1";
-        $stmtIntervalo = $pdo->prepare($sqlIntervalo);
-        $stmtIntervalo->bindParam(':codpet', $codpet);
-        $stmtIntervalo->execute();
-        $ultimaDoacao = $stmtIntervalo->fetch(PDO::FETCH_ASSOC);
-
-        if ($ultimaDoacao) {
-            $dtUltima = new DateTime($ultimaDoacao['datent']);
-            $dtAtual  = new DateTime($datent);
-            $diasDecorridos = $dtUltima->diff($dtAtual)->days;
-
-            if ($diasDecorridos < 90) {
-                $diasRestantes = 90 - $diasDecorridos;
-                $dataLibera = (new DateTime($ultimaDoacao['datent']))->modify('+90 days')->format('d/m/Y');
-                echo json_encode([
-                    "status" => "aviso",
-                    "msg"    => "⚠️ Atenção: este animal doou há {$diasDecorridos} dia(s). O intervalo mínimo recomendado é de 90 dias. A próxima doação estará liberada em {$dataLibera} (faltam {$diasRestantes} dia(s)). Deseja registrar mesmo assim?"
-                ]);
-                exit;
-            }
-        }
-    }
-
-    // VALIDAÇÃO: VOLUME MÁXIMO POR ESPÉCIE (Cachorro ≤ 450ml, Gato ≤ 60ml)
-    $sqlEsp = "SELECT e.nome AS nomeEspecie
-               FROM pet p
-               LEFT JOIN especie e ON e.codigo = p.codEspecie
-               WHERE p.codigo = :codpet";
-    $stmtEsp = $pdo->prepare($sqlEsp);
-    $stmtEsp->bindParam(':codpet', $codpet);
-    $stmtEsp->execute();
-    $petEsp = $stmtEsp->fetch(PDO::FETCH_ASSOC);
-
-    if ($petEsp) {
-        $limitesEsp = ['Cachorro' => 450, 'Gato' => 60];
-        $nomeEsp    = $petEsp['nomeEspecie'] ?? '';
-        if (isset($limitesEsp[$nomeEsp]) && floatval($qtdcol) > $limitesEsp[$nomeEsp]) {
-            echo json_encode([
-                "status" => "erro",
-                "msg"    => "⛔ Volume máximo para {$nomeEsp} é {$limitesEsp[$nomeEsp]} ml. Informe um valor dentro do limite."
-            ]);
-            exit;
-        }
-    }
 
     // INSERT
 	

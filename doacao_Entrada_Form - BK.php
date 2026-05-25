@@ -121,7 +121,7 @@ function formatarDataBR($data) {
                 <div class="modal-body">
 
                     <label>Data Coleta</label>
-                    <input name="datent" id="datent" type="date" class="form-control" required>
+                    <input name="datent" type="date" class="form-control" required>
 
                     <label>Hora</label>
                     <input name="horent" type="time" class="form-control" required>
@@ -141,11 +141,11 @@ function formatarDataBR($data) {
                     <input id="codtip_nome" class="form-control" readonly>
 					<input type="hidden" id="codtip" name="codtip">
 
-                    <label>Quantidade (ml) <small id="limiteHint" class="text-muted"></small></label>
-                    <input name="qtdcol" id="qtdcol" type="number" step="0.01" min="0.01" class="form-control" required>
+                    <label>Quantidade (ml)</label>
+                    <input name="qtdcol" type="number" class="form-control" required>
 
-                    <label>Validade <small class="text-muted">(sugerida: 35 dias após a coleta)</small></label>
-                    <input name="datven" id="datven" type="date" class="form-control" required>
+                    <label>Validade</label>
+                    <input name="datven" type="date" class="form-control" required>
 
                     <label>Veterinário</label>
                     <select name="codvet" class="form-control" required>
@@ -196,25 +196,11 @@ function formatarDataBR($data) {
 <script>
 $(document).ready(function(){
 
-    // SUGESTÃO DE VALIDADE AUTOMÁTICA (+35 dias)
-    $(document).on('change', '#datent', function(){
-        var datent = $(this).val();
-        if (!datent) return;
-        var dt = new Date(datent);
-        dt.setDate(dt.getDate() + 35);
-        var ano  = dt.getFullYear();
-        var mes  = String(dt.getMonth() + 1).padStart(2, '0');
-        var dia  = String(dt.getDate()).padStart(2, '0');
-        $('#datven').val(ano + '-' + mes + '-' + dia);
-    });
-
     // ABRIR MODAL
     $('.adcBtn').on('click', function(e){
         e.preventDefault();
         $('#formAdd')[0].reset();
         $('#codtip').val('');
-		$('#qtdcol').removeAttr('max');
-        $('#limiteHint').text('');
         $('#addModal').modal('show');
     });
 
@@ -239,19 +225,9 @@ $(document).ready(function(){
 
                 if(res.status === 'ok'){
                     $('#codtip_nome').val(res.tipoSanguineo);
-                    $('#codtip').val(res.codigo);
-
-                    if (res.limiteQtd) {
-                        $('#qtdcol').attr('max', res.limiteQtd);
-                        $('#limiteHint').text('(máx. ' + res.limiteQtd + ' ml para ' + res.nomeEspecie + ')');
-                    } else {
-                        $('#qtdcol').removeAttr('max');
-                        $('#limiteHint').text('');
-                    }
+					$('#codtip').val(res.codigo);
                 } else {
                     $('#codtip').val('');
-                    $('#qtdcol').removeAttr('max');
-                    $('#limiteHint').text('');
                 }
             },
 
@@ -263,28 +239,20 @@ $(document).ready(function(){
 
     });
 
-
     // INSERT
     $('#formAdd').on('submit', function(e){
         e.preventDefault();
-        enviarColeta($(this).serialize());
-    });
 
-    function enviarColeta(dados) {
         $.ajax({
             url: 'BDO/doacao_entrada/doacao_entrada_insert.php',
             type: 'POST',
-            data: dados,
+            data: $(this).serialize(),
             dataType: 'json',
 
             success: function(res){
                 if(res.status === 'ok'){
                     alert(res.msg);
                     location.reload();
-                } else if(res.status === 'aviso'){
-                    if(confirm(res.msg)){
-                        enviarColeta(dados + '&forcar=1');
-                    }
                 } else {
                     alert(res.msg);
                 }
@@ -295,7 +263,7 @@ $(document).ready(function(){
                 alert('Erro ao salvar');
             }
         });
-    }
+    });
 
     // DELETE
     $(document).on('click', '.delbtn', function(){
@@ -324,25 +292,25 @@ $(document).ready(function(){
 
 
 	// FILTRANDO PELO STATUS DA BOLSA DE SANGUE
-	$('#filtroStatus').on('change', function() {
+$('#filtroStatus').on('change', function() {
 
-		var statusSelecionado = $(this).val().toLowerCase().trim();
+    var statusSelecionado = $(this).val().toLowerCase().trim();
 
-		$('#myTable tr').each(function() {
+    $('#myTable tr').each(function() {
 
-			var statusLinha = $(this).find('td:eq(6)').text().toLowerCase().trim();
+        var statusLinha = $(this).find('td:eq(6)').text().toLowerCase().trim();
 
-			if (statusSelecionado === "") {
-				$(this).show();
-			} else if (statusLinha.includes(statusSelecionado)) {
-				$(this).show();
-			} else {
-				$(this).hide();
-			}
+        if (statusSelecionado === "") {
+            $(this).show();
+        } else if (statusLinha.includes(statusSelecionado)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
 
-		});
+    });
 
-	});
+});
 
 
 });

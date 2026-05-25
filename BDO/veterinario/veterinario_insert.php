@@ -4,8 +4,8 @@
 	//Inserindo
 	try {
      
-  		$stmt = $pdo->prepare('INSERT INTO veterinario (codigo, nome, cpf, cep, rua, complemento, bairro, cidadeestado, email, telefone, login, senha) VALUES (null,:nome, :cpf, :cep, :rua, :complemento, :bairro, :cidadeestado, :email, :telefone, :login, :senha)');
-		$stmt->execute(array(':nome' => $_POST['nome'], ':cpf' => $_POST['cpf'], ':cep' => $_POST['cep'], ':rua' => $_POST['rua'], ':complemento' => $_POST['complemento'], ':bairro' => $_POST['bairro'], ':cidadeestado' => $_POST['cidadeestado'], ':email' => $_POST['email'], ':telefone' => $_POST['telefone'], ':login' => $_POST['login'], ':senha' => $_POST['senha']));
+  		$stmt = $pdo->prepare('INSERT INTO veterinario (nome, crmv, cidadeestado, clinica, telefone) VALUES (:nome, :crmv, :cidadeestado, :clinica, :telefone)');
+		$stmt->execute(array(':nome' => $_POST['nome'], ':crmv' => $_POST['crmv'], ':cidadeestado' => $_POST['cidadeestado'], ':clinica' => $_POST['clinica'], ':telefone' => $_POST['telefone']));
    
 		echo $stmt->rowCount(); 
 	}

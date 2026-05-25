@@ -72,7 +72,8 @@ include("BDO/cidade/cidade_select.php");
                             <a href="" class="delbtn delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Excluir">&#xE872;</i></a>
                         </td>
                         <td width="10%"><?php echo $value['codigo']; ?></td>
-                        <td width="20%"><?php echo $value['nome']; ?></td>
+						<td width="20%"><a href="tutor_Comp_Form.php?id=<?php echo $value['codigo']; ?>"><?php echo $value['nome']; ?></a></td>
+                        <!-- <td width="20%"><?php echo $value['nome']; ?></td>  -->
                         <td width="10%"><?php echo Mask("###.###.###-##",$value['cpf']).'<BR>'; ?></td>
                         <td width="25%"><?php echo $value['email']; ?></td>
                         <td width="20%"><?php echo Mask("(##) #####-####",$value['telefone']).'<BR>'; ?></td>

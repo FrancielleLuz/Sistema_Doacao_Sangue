@@ -11,8 +11,10 @@
 			INNER JOIN cidadeestado 
 			ON tutor.cidadeestado = cidadeestado.codigo
 			INNER JOIN estado 
-            ON cidadeestado.estado = estado.codigo'
-		);
+            ON cidadeestado.estado = estado.codigo
+			WHERE
+			tutor.codigo=:codigo');
+        $stmt->execute(array(':codigo' => $_GET['id']));
 		$stmt->execute();
 	} catch(PDOException $e) {
 		echo 'Error: ' . $e->getMessage();
