@@ -1,7 +1,7 @@
 <?php
 // resetar.php — valida o token e exibe formulário de nova senha
 session_start();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/config.php';
 
 $token = $_GET['token'] ?? '';
 $erro  = '';
@@ -12,6 +12,7 @@ if ($token === '') {
   $erro = 'Link inválido ou ausente. Solicite novamente.';
 } else {
   try {
+    $pdo = db_pdo();
     $hash = hash('sha256', $token);
 
     $st = $pdo->prepare(

@@ -1,7 +1,19 @@
 <?php
-// esqueci_enviar.php — gera token, grava na tabela e mostra o link de redefinição
+// esqueci_enviar.php — gera token, grava na tabela e envia e-mail via Gmail SMTP
 session_start();
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/lib/PHPMailer/Exception.php';
+require_once __DIR__ . '/lib/PHPMailer/PHPMailer.php';
+require_once __DIR__ . '/lib/PHPMailer/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as MailException;
+
+// ─── CONFIGURAÇÕES DE E-MAIL ────────────────────────────────────────────────
+define('MAIL_FROM',     'herman.alvesgomes@gmail.com');
+define('MAIL_PASSWORD', 'rowujzirnmoofogo');
+define('MAIL_FROM_NAME','PetSis - Doação de Sangue');
+// ────────────────────────────────────────────────────────────────────────────
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: esqueci.php');
@@ -14,31 +26,31 @@ if ($email === '') {
     exit;
 }
 
-$pdo = db_pdo();
-
 // Função para montar URL absoluta do reset
 function make_reset_url(string $token): string {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $base   = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'); // ex: /Sistema_Doacao_Sangue
+    $base   = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     return $scheme.'://'.$host.$base.'/resetar.php?token='.$token;
 }
 
+$link      = null;
+$emailEnviado = false;
+$erroMail  = null;
+
 try {
     // 1) Busca usuário (sem revelar se existe)
-    $st = $pdo->prepare('SELECT codigo, email FROM usuarios WHERE email = ? LIMIT 1');
+    $st = $pdo->prepare('SELECT codigo, nome, email FROM usuarios WHERE email = ? LIMIT 1');
     $st->execute([$email]);
     $user = $st->fetch();
 
-    // 2) Se existir, invalida tokens antigos e cria um novo
-    $link = null;
     if ($user) {
         $userId = (int)$user['codigo'];
 
-        // Invalida tokens anteriores não usados
+        // 2) Invalida tokens anteriores não usados
         $pdo->prepare('UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0')->execute([$userId]);
 
-        // Gera token (64 hex) e guarda hash SHA-256
+        // 3) Gera token e salva hash
         $token      = bin2hex(random_bytes(32));
         $token_hash = hash('sha256', $token);
         $expires_at = date('Y-m-d H:i:s', time() + 3600); // 1 hora
@@ -46,16 +58,47 @@ try {
         $ins = $pdo->prepare('INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)');
         $ins->execute([$userId, $token_hash, $expires_at]);
 
-        // Monta link para exibir na tela (ambiente de desenvolvimento)
         $link = make_reset_url($token);
+
+        // 4) Envia e-mail via Gmail SMTP
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = MAIL_FROM;
+        $mail->Password   = MAIL_PASSWORD;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+        $mail->CharSet    = 'UTF-8';
+
+        $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+        $mail->addAddress($user['email'], $user['nome'] ?? '');
+        $mail->Subject = 'Redefinição de senha — PetSis';
+        $mail->isHTML(true);
+        $mail->Body = "
+            <p>Olá, <b>" . htmlspecialchars($user['nome'] ?? '', ENT_QUOTES, 'UTF-8') . "</b>!</p>
+            <p>Recebemos uma solicitação para redefinir a senha da sua conta no <b>PetSis</b>.</p>
+            <p>Clique no botão abaixo para criar uma nova senha. O link é válido por <b>1 hora</b>.</p>
+            <p style='margin:24px 0'>
+                <a href='" . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . "'
+                   style='background:#435d7d;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none;font-size:15px'>
+                   Redefinir minha senha
+                </a>
+            </p>
+            <p style='color:#888;font-size:12px'>Se você não solicitou isso, ignore este e-mail. Sua senha permanece a mesma.</p>
+        ";
+        $mail->AltBody = "Acesse o link para redefinir sua senha: " . $link;
+
+        $mail->send();
+        $emailEnviado = true;
     }
 
+} catch (MailException $e) {
+    $erroMail = $e->getMessage();
 } catch (Throwable $e) {
     header('Location: esqueci.php?erro=' . urlencode('Erro: '.$e->getMessage()));
     exit;
 }
-
-// 3) Exibe página de confirmação (sem revelar se o e-mail existe).
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -77,10 +120,13 @@ try {
     <p>Se <b><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></b> estiver cadastrado, enviamos um link para redefinição de senha.
        O link expira em <b>1 hora</b>.</p>
 
-    <?php if ($link): ?>
-      <div class="alert alert-info">
-        <b>Ambiente de desenvolvimento:</b><br>
-        Use o link abaixo para redefinir agora (sem enviar e-mail):
+    <?php if ($emailEnviado): ?>
+      <div class="alert alert-success">E-mail enviado com sucesso! Verifique sua caixa de entrada.</div>
+    <?php endif; ?>
+
+    <?php if ($erroMail && $link): ?>
+      <div class="alert alert-warning">
+        <b>Não foi possível enviar o e-mail.</b> Use o link abaixo para redefinir sua senha:
         <div style="margin-top:8px">
           <a class="btn btn-primary" href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>">Abrir página de redefinição</a>
         </div>

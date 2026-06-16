@@ -51,9 +51,6 @@ unset($_SESSION['erro_login']);
         </div>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
       </form>
-      <div style="margin-top:12px; text-align:center;">
-        <a href="esqueci.php">Esqueci minha senha</a>
-      </div>
     </div>
   </div>
 </body>

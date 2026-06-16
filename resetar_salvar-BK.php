@@ -1,7 +1,7 @@
 <?php
 // resetar_salvar.php — valida token, salva a nova senha (hash) e invalida o token
 session_start();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth_password.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -30,7 +30,7 @@ if (mb_strlen($senha) < 6) {
   exit;
 }
 
-// $pdo já disponível via db.php
+$pdo = db_pdo();
 
 try {
   $pdo->beginTransaction();
