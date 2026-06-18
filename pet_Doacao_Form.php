@@ -60,7 +60,11 @@ include("BDO/pet/pet_tutor_select.php");         // define $arrCombo4 (tutores)
                     <td><?php echo $value['especie']; ?></td>
                     <td><?php echo $value['tipoSanguineo']; ?></td>
 					<td><a href="tutor_Comp_Form.php?id=<?php echo $value['codtutor']; ?>"><?php echo $value['tutor']; ?></a></td>
-					<td><?php echo $value['telefone']; ?></td>
+					<td>
+						<a href="https://wa.me/<?php echo preg_replace('/\D/', '', $value['telefone']); ?>" target="_blank">
+							<?php echo $value['telefone']; ?>
+						</a>
+					</td>
 					<td><?php echo $value['email']; ?></td>
                 </tr>
                 <?php } ?>
