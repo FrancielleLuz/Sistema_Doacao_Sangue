@@ -76,7 +76,13 @@ include("BDO/cidade/cidade_select.php");
                         <!-- <td width="20%"><?php echo $value['nome']; ?></td>  -->
                         <td width="10%"><?php echo Mask("###.###.###-##",$value['cpf']).'<BR>'; ?></td>
                         <td width="25%"><?php echo $value['email']; ?></td>
-                        <td width="20%"><?php echo Mask("(##) #####-####",$value['telefone']).'<BR>'; ?></td>
+                       
+					    <td width="20%"><?php echo Mask("(##) #####-####",$value['telefone']).'<BR>'; ?></td>
+						<td>
+						<a href="https://wa.me/<?php echo preg_replace('/\D/', '', $value['telefone']); ?>" target="_blank">
+							<?php echo $value['telefone']; ?>
+						</a>
+					</td>
                     </tr>
                     <?php } ?>
                 </tbody>
